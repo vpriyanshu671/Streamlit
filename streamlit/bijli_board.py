@@ -26,16 +26,13 @@ if uploaded_file is not None:
             # Display available columns to help troubleshoot
             st.write("Available columns in your file:", df.columns.tolist())
         else:
-            # Filter rows where "Outage Reason" starts with "11KV"
-            df = df[df["Outage Reason"].str.contains(r'^11[kK][vV]', regex=True)]
-            
             # Remove rows where "Outage Reason" starts with "66KV" or "220KV"
             # Using non-capturing group (?:pattern) to avoid the warning
             df = df[~df["Outage Reason"].str.contains(r'^(?:66|220)[kK][vV]', regex=True)]
             
-            st.write(f"After filtering for 11KV outages: {len(df)} records")
+            st.write(f"After filtering out 66KV/220KV outages: {len(df)} records")
             
-            # NEW APPROACH: Group by all key columns to find exact duplicates
+            # Group by all key columns to find exact duplicates
             # Count occurrences of each unique combination across key columns
             columns_to_group = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins"]
             combined_counts = df.groupby(columns_to_group).size().reset_index(name="count")
@@ -71,7 +68,7 @@ if uploaded_file is not None:
                     mime="text/csv",
                 )
             else:
-                st.write("No wrong entries found , all entries are ok !")
+                st.write("No duplicate entries found, all entries are unique!")
             
     except Exception as e:
         st.error(f"An error occurred during processing: {e}")
