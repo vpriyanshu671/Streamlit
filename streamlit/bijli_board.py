@@ -18,7 +18,7 @@ if uploaded_file is not None:
         st.write(f"Original data: {len(df)} records")
         
         # Check if required columns exist
-        required_columns = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins"]
+        required_columns = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "Zone", "Circle"]
         missing_columns = [col for col in required_columns if col not in df.columns]
         
         if missing_columns:
@@ -49,7 +49,7 @@ if uploaded_file is not None:
                 df_final = df.merge(duplicate_records, on=columns_to_group)
                 
                 # Display all columns so differences in other fields are visible
-                columns_to_display = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "count"]
+                columns_to_display = ["Feeding Grid", "Zone", "Circle", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "count"]
                 df_display = df_final[columns_to_display].copy()  # Create an explicit copy
                 
                 # Create a unique group identifier for coloring
@@ -61,8 +61,8 @@ if uploaded_file is not None:
                 # Create a styled dataframe with background colors based on group_id
                 def highlight_groups(row):
                     group_id = row['group_id']
-                    # Generate a color based on group_id (using a color cycle)
-                    colors = ['#ffcccc', '#ccffcc', '#ccccff', '#ffffcc', '#ffccff', '#ccffff', '#f0f0f0', '#e0ffe0']
+                    # Generate a color based on group_id (alternating blue and white)
+                    colors = ['#D7DEF8', '#ffffff']  # Light blue and white
                     color = colors[group_id % len(colors)]
                     return [f'background-color: {color}; color: black; font-weight: normal'] * len(row)
                 
