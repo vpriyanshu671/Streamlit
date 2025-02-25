@@ -18,7 +18,7 @@ if uploaded_file is not None:
         st.write(f"Original data: {len(df)} records")
         
         # Check if required columns exist
-        required_columns = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "Zone", "Circle"]
+        required_columns = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "Zone", "Circle", "Start Time"]
         missing_columns = [col for col in required_columns if col not in df.columns]
         
         if missing_columns:
@@ -49,7 +49,7 @@ if uploaded_file is not None:
                 df_final = df.merge(duplicate_records, on=columns_to_group)
                 
                 # Display all columns so differences in other fields are visible
-                columns_to_display = ["Feeding Grid", "Zone", "Circle", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "count"]
+                columns_to_display = ["Feeding Grid", "Zone", "Circle", "Division", "Outage Reason", "Category", "Feeder", "Start Time","Diff in mins", "count"]
                 df_display = df_final[columns_to_display].copy()  # Create an explicit copy
                 
                 # Create a unique group identifier for coloring
