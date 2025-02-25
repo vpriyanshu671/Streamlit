@@ -35,38 +35,43 @@ if uploaded_file is not None:
             
             st.write(f"After filtering for 11KV outages: {len(df)} records")
             
-            # Count occurrences of each "Feeding Grid"
-            feeding_grid_counts = df["Feeding Grid"].value_counts().reset_index()
-            feeding_grid_counts.columns = ["Feeding Grid", "count"]
+            # NEW APPROACH: Group by all key columns to find exact duplicates
+            # Count occurrences of each unique combination across key columns
+            columns_to_group = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins"]
+            combined_counts = df.groupby(columns_to_group).size().reset_index(name="count")
             
-            # Filter to keep only rows where "Feeding Grid" appears more than 2 times
-            frequent_grids = feeding_grid_counts[feeding_grid_counts["count"] > 2]["Feeding Grid"]
-            df_filtered = df[df["Feeding Grid"].isin(frequent_grids)]
+            # Filter to keep only combinations that appear more than once
+            duplicate_records = combined_counts[combined_counts["count"] > 1]
             
-            st.write(f"After filtering for frequently affected grids: {len(df_filtered)} records")
+            st.write(f"Duplicate records found: {len(duplicate_records)}")
             
-            # Add count column by merging
-            df_display = df_filtered.merge(feeding_grid_counts, on="Feeding Grid")
-            
-            # Select only the specified columns for display
-            columns_to_display = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "count", "Diff in mins"]
-            df_display = df_display[columns_to_display]
-            
-            # Sort by count (descending)
-            df_display = df_display.sort_values(by="count", ascending=False)
-            
-            # Display the results
-            st.write("Filtered and Analyzed Results:")
-            st.dataframe(df_display)
-            
-            # Download option for processed data
-            csv = df_display.to_csv(index=False)
-            st.download_button(
-                label="Download processed data as CSV",
-                data=csv,
-                file_name="processed_bijli_data.csv",
-                mime="text/csv",
-            )
+            # If we have duplicates, merge them back with original data
+            if not duplicate_records.empty:
+                # Join the counts back with the original filtered data
+                # Use merge to match rows having the same combination of key columns
+                df_final = df.merge(duplicate_records, on=columns_to_group)
+                
+                # Sort by count (descending)
+                df_final = df_final.sort_values(by="count", ascending=False)
+                
+                # Select only the columns we want to display
+                columns_to_display = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "count", "Diff in mins"]
+                df_display = df_final[columns_to_display]
+                
+                # Display the results
+                st.write("Duplicate Entries Analysis:")
+                st.dataframe(df_display)
+                
+                # Download option for processed data
+                csv = df_display.to_csv(index=False)
+                st.download_button(
+                    label="Download processed data as CSV",
+                    data=csv,
+                    file_name="processed_bijli_data.csv",
+                    mime="text/csv",
+                )
+            else:
+                st.write("No wrong entries found , all entries are ok !")
             
     except Exception as e:
         st.error(f"An error occurred during processing: {e}")
