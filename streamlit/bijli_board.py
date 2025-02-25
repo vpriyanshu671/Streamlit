@@ -18,7 +18,7 @@ if uploaded_file is not None:
         st.write(f"Original data: {len(df)} records")
         
         # Check if required columns exist
-        required_columns = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "Zone", "Circle", "Start Time"]
+        required_columns = ["Feeding Grid", "Division", "Outage Reason", "Category", "Feeder", "Diff in mins", "Zone", "Circle", "Start Time", "Status", "Type of Outage"]
         missing_columns = [col for col in required_columns if col not in df.columns]
         
         if missing_columns:
@@ -33,6 +33,8 @@ if uploaded_file is not None:
             
             # Additional filter to remove records with bad weather safety reason
             df = df[~df["Outage Reason"].str.contains("Supply off from 66kV Grid for Safety due to Bad Weather", case=False)]
+
+            df = df[~df["Outage Reason"].str.contains("PC Power Cut as Informed by Grid SSO/SSA", case=False)]
             
             # Modified: Group only by "Feeding Grid" and "Diff in mins"
             columns_to_group = ["Feeding Grid", "Diff in mins"]
@@ -50,8 +52,8 @@ if uploaded_file is not None:
                 df_final = df.merge(duplicate_records, on=columns_to_group)
                 
                 # Display all columns so differences in other fields are visible
-                columns_to_display = ["Feeding Grid", "Zone", "Circle", "Division", "Outage Reason", "Category", "Feeder", "Start Time","Diff in mins", "count"]
-                df_display = df_final[columns_to_display].copy()  # Create an explicit copy
+                columns_to_display = ["Feeding Grid", "Status","Zone", "Circle", "Division", "Outage Reason", "Category", "Feeder", "Type of Outage","Start Time","Diff in mins", "count"]
+                df_display = df_final[columns_to_display].copy() 
                 
                 # Create a unique group identifier for coloring
                 df_display['group_id'] = pd.factorize(df_display['Feeding Grid'] + '_' + df_display['Diff in mins'].astype(str))[0]
