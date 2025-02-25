@@ -28,10 +28,11 @@ if uploaded_file is not None:
             st.write("Available columns in your file:", df.columns.tolist())
         else:
             # Remove rows where "Outage Reason" starts with "66KV" or "220KV"
-            # Using non-capturing group (?:pattern) to avoid the warning
             df = df[~df["Outage Reason"].str.contains(r'^(?:66|220)[kK][vV]', regex=True)]
-            
             st.write(f"After filtering out 66KV/220KV outages: {len(df)} records")
+            
+            # Additional filter to remove records with bad weather safety reason
+            df = df[~df["Outage Reason"].str.contains("Supply off from 66kV Grid for Safety due to Bad Weather", case=False)]
             
             # Modified: Group only by "Feeding Grid" and "Diff in mins"
             columns_to_group = ["Feeding Grid", "Diff in mins"]
